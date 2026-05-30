@@ -44,7 +44,6 @@ def validate_cancels(ws):
         if is_valid_date(cell.valur) and cell.font.striked:
             pass
 
-
 def prepare_headers(ws):
     ws["B1"] = "дата"
     ws["C1"] = "номер"
@@ -55,6 +54,13 @@ def prepare_headers(ws):
         print(cell.value)
     ws["V1"] = "елтех"
 
+def remove_last_number(s="(зміни в 2431)                               3719"):
+    if s is None:
+        return None
+    s=str(s)
+    m = re.search(r'^(.*?)([+-]?\d+)\s*$', s)
+    return m.group(1).rstrip() if m else s
+
 
 def prepare_rows(ws):
     last_row = ws.max_row
@@ -63,7 +69,6 @@ def prepare_rows(ws):
     while True:
         value_b = ws.cell(row=row, column=2).value
         text = str(value_b).strip()
-        print(row, value_b, text)
 
         if row>last_row:
             return
@@ -71,14 +76,26 @@ def prepare_rows(ws):
             row+=1
             continue
 
+
         ws.cell(row=row, column=1).value = id
-        id+=1
+        #operation = ws.cell(row=row, column=3).value
+        # order_id = get_last_number(operation)
+        effect = remove_last_number(operation)
+        ws.cell(row=row, column=1).value = id
+        # ws.cell(row=row, column=4).value = order_id
+        # ws.cell(row=row, column=5).value = effect
+        # ws.cell(row=row, column=6).value = ws.cell(row=row, column=28).value
+
+        print(row, id, order_id, effect)
+        id += 1
         row+=1
 
 def migrate_excel_sheme(ws:Worksheet):
-    ws.insert_rows(3, amount=3)
-    ws["C1"]="order_id"
-    ws["D1"]="effects"
+    ws.insert_cols(4, amount=3)
+    ws["C1"] = "operator"
+    ws["D1"] = "order_id"
+    ws["E1"] = "effects"
+    ws["F1"] = "comment"
 
 def delete_empty_bottom(ws:Worksheet):
     start_row = None
@@ -107,26 +124,10 @@ def prepare_excel():
     wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
     #print(ws['B9177'].font.strike); return
     prepare_headers(ws)
-    ws.insert_cols(3, amount=3)
-    ws["C1"] = "operator"
-    ws["D1"] = "order_id"
-    ws["E1"] = "effects"
 
-    wb.save(sourcefile); exit()
     prepare_rows(ws)
-    wb.save(sourcefile);wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
+    wb.save(sourcefile) #;wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
 
-def remove_last_number(s="(зміни в 2431)                               3719"):
-    m = re.search(r'^(.*?)([+-]?\d+)\s*$', s)
-    return m.group(1).rstrip() if m else s
-
-def get_last_number(s="(зміни в 2431)                               3719"):
-    parts = s.split()
-    if not parts:
-        return None
-
-    last = parts[-1]
-    return int(last) if last.isdigit() else None
 
 if __name__ == "__main__":
-    print(remove_last_number())
+    prepare_excel()
