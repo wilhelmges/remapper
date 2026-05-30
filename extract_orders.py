@@ -10,7 +10,7 @@ start_row = 5995
 sourcefile = "source.xlsx"
 
 # Відкрити базу (або створити, якщо її немає)
-conn = sqlite3.connect("data.db")
+conn = sqlite3.connect("wasted.db")
 # Створити курсор
 cur = conn.cursor()
 
@@ -72,9 +72,16 @@ def extract():
                 row += 1
                 continue
             else:
-                print(values, row, date, order_id, changed, root_info[0], root_info[1])
+                print(row, date, order_id, changed, root_info[0], root_info[1], values )
         else:
-            print(values,row, date, order_id, changed)
+            print(row, date, order_id, changed, values)
+
+        for value in values:
+            if value is not None:
+                cur.execute(
+                    "INSERT INTO wasted (name, age) VALUES (?, ?)",
+                    ("Іван", 25)
+                )
 
 
 
