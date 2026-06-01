@@ -6,12 +6,13 @@ import re
 from core import is_valid_date
 from datetime import datetime
 
+from core import headers, department_to_sheet
+
 start_row = 5995
 sourcefile = "source.xlsx"
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")
-# Створити курсор
 cur = conn.cursor()
 
 
@@ -38,11 +39,12 @@ def find_root_order_info(ws, row):
         if not is_valid_date(textdate) or order_id is None:
             return None
         date = datetime.date(textdate)
-        return date, order_id
+        return order_id, date
 
 def extract():
+    cur.execute("DELETE FROM wasted");  conn.commit()
     wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]
-    last_row = 6011 #ws.max_row #9475
+    last_row = 6055 #ws.max_row #9475
     row = 5995
 
     while True:
@@ -63,38 +65,36 @@ def extract():
         for col in range(4, 25)
         ]
 
+        changed = None; root_order_id = None; root_date = None
         date = datetime.date(textdate)
         changed = ws.cell(row=row, column=2).font.strike
         if changed:
             root_info = find_root_order_info(ws, row)
+            root_order_id, root_date = root_info
             if root_info is None:
                 print(row, "cant be processed")
                 row += 1
                 continue
             else:
-                print(row, date, order_id, changed, root_info[0], root_info[1], values )
+                print(row, order_id, date, changed, root_order_id, root_date, values )
         else:
-            print(row, date, order_id, changed, values)
+            print(row, order_id, date, changed, root_order_id, root_date, values )
 
-        for value in values:
-            if value is not None:
+        for i, value in enumerate(values):
+            sheet_name = department_to_sheet[headers[i]]
+            if value is not None and sheet_name is not None:
+                pass
                 cur.execute(
-                    "INSERT INTO wasted (name, age) VALUES (?, ?)",
-                    ("Іван", 25)
+                    "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department, money) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (order_id, date, root_order_id, root_date, headers[i], value)
                 )
-
-
-
-
-
 
         operation = ws.cell(row=row, column=3).value
 
-        # ws.cell(row=row, column=4).value = order_id
-        # ws.cell(row=row, column=5).value = effect
-        # ws.cell(row=row, column=6).value = ws.cell(row=row, column=28).value
-
         row += 1
+
+    conn.commit(); conn.close()
 
 
 if __name__=="__main__":
