@@ -44,7 +44,7 @@ def find_root_order_info(ws, row):
 def extract():
     cur.execute("DELETE FROM wasted");  conn.commit()
     wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]
-    last_row = 6055 #ws.max_row #9475
+    last_row = ws.max_row #9475 6055 #
     row = 5995
 
     while True:
@@ -85,9 +85,9 @@ def extract():
             if value is not None and sheet_name is not None:
                 pass
                 cur.execute(
-                    "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department, money) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (order_id, date, root_order_id, root_date, headers[i], value)
+                    "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department,sheet_name, money, row) "
+                    "VALUES (?, ?, ?, ?, ?,?, ?, ?)",
+                    (order_id, date, root_order_id, root_date, headers[i],sheet_name, value, row)
                 )
 
         operation = ws.cell(row=row, column=3).value
