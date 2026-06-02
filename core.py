@@ -1,4 +1,5 @@
 from datetime import datetime, date
+import re
 
 def is_valid_date(value):
     if value is None:
@@ -58,3 +59,14 @@ department_to_sheet = {
     "пожежна": None,
     "метрол": "Метрологія",
 }
+
+def get_order_from_comment(s="(зміни в 2431)                               3719"):
+    operation = str(s)
+    if operation.isdigit():
+        order_id = int(operation)
+    else:
+        order_id = re.sub(r'\([^)]*\)', '', operation).strip()
+    return order_id
+
+if __name__=='__main__':
+    print(get_order_from_comment(2353))

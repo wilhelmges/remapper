@@ -6,6 +6,7 @@ import re
 from core import is_valid_date
 from datetime import datetime
 import re
+import re
 
 def get_order(s= "№106 (ОД) 08.01.2026"):
     match = re.search(r"\d+", s)
@@ -20,29 +21,9 @@ def get_order(s= "№106 (ОД) 08.01.2026"):
 # values = [None, None, None, None, None, 1122000.64, None, 180.05, 16947.73, None, None, None, None, None, None, None, None, None, None, None, None]
 
 if __name__=="__main__":
-    s = '05.01.2026'
-    print(len(s))
-
-    # s = '№42 (ОД) 05.01.2026'
-    # d = (s.split()[-1])
-    # date = datetime.strptime(d, "%d.%m.%Y").date()
-    # print(date)
-
-    exit()
-    print(len(headers), len(values))
+    vs = [None, 24015.24, 553295.36, None, 1479304.3, None, None, None, None, None, None, None, None, None, None, None, None,
+     None, None, None, None]
+    for i,v in enumerate(vs):
+        print(i,v)
 
 
-
-    wb = load_workbook("output.xlsx")
-
-    sheet_names = wb.sheetnames
-    print(sheet_names);
-
-    wb = load_workbook(sourcefile, data_only=True);
-    ws: Worksheet = wb["Sheet1"]
-
-    values = [
-        ws.cell(row=1, column=col).value
-        for col in range(4, 25)
-    ]
-    print(values)

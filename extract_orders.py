@@ -6,26 +6,15 @@ import re
 from core import is_valid_date
 from datetime import datetime
 
-from core import headers, department_to_sheet
+from core import headers, department_to_sheet, get_order_from_comment
+from styles import mark_neutral
 
-start_row = 5995
 sourcefile = "source.xlsx"
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")
 cur = conn.cursor()
 
-
-def get_last_number(s="(зміни в 2431)                               3719"):
-    if s is None:
-        return None
-    s = str(s)
-    parts = s.split()
-    if not parts:
-        return None
-
-    last = parts[-1]
-    return int(last) if last.isdigit() else None
 
 def find_root_order_info(ws, row):
     while True:
@@ -35,29 +24,30 @@ def find_root_order_info(ws, row):
             continue
         textdate = ws.cell(row=row, column=2).value
         operation = ws.cell(row=row, column=3).value
-        order_id = get_last_number(operation)
+        order_id = get_order_from_comment(operation)
         if not is_valid_date(textdate) or order_id is None:
-            return None
+            return None, None
         date = datetime.date(textdate)
         return order_id, date
 
 def extract():
     cur.execute("DELETE FROM wasted");  conn.commit()
     wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]
-    last_row = ws.max_row #9475 6055 #
+    last_row =  ws.max_row #8000 #9475 6078 #
     row = 5995
 
-    while True:
-        if row > last_row:
-            break
+    #print(ws.cell(row=6006, column=9).value); exit()
+
+    for row in range(row, last_row):
+        if ws.cell(row=row, column=2).value is None:
+            continue
 
         textdate = ws.cell(row=row, column=2).value
-        operation = ws.cell(row=row, column=3).value
-        order_id = get_last_number(operation)
+        operation = str(ws.cell(row=row, column=3).value)
+        order_id = get_order_from_comment(operation)
 
         if not is_valid_date(textdate) or order_id is None:
-            row += 1
-            print(row, textdate, order_id, operation)
+            print('cant get order or data', row, textdate, order_id, operation)
             continue
 
         values = [
@@ -65,36 +55,48 @@ def extract():
         for col in range(4, 25)
         ]
 
+        w=[]
+        blank = True
+        for i, col in enumerate(range(4, 25)):
+            #print(i, ws.cell(row=row, column=col).font.strike, headers[i], department_to_sheet[headers[i]], values[i])
+            if ws.cell(row=row, column=col).font.strike or department_to_sheet[headers[i]]==None or values[i]==None:
+                values[i]=None
+            else:
+                blank = False
+
+        if blank:
+            print('empty values ', row, values)
+            mark_neutral(ws, row)
+
         changed = None; root_order_id = None; root_date = None
         date = datetime.date(textdate)
         changed = ws.cell(row=row, column=2).font.strike
         if changed:
-            root_info = find_root_order_info(ws, row)
-            root_order_id, root_date = root_info
-            if root_info is None:
+            root_order_id, root_date = find_root_order_info(ws, row)
+            if root_order_id is None or root_date is None:
                 print(row, "cant be processed")
-                row += 1
                 continue
-            else:
-                print(row, order_id, date, changed, root_order_id, root_date, values )
-        else:
-            print(row, order_id, date, changed, root_order_id, root_date, values )
+
+        #print(row, order_id, date, changed, root_order_id, root_date, values )
 
         for i, value in enumerate(values):
             sheet_name = department_to_sheet[headers[i]]
-            if value is not None and sheet_name is not None:
-                pass
+            if value is not None:
+                if sheet_name is not None:
+                    pass#print('adding to sheet', sheet_name)
+                else:
+                    print('no sheet to add', headers[i])
+                    print(row, order_id, date, changed, root_order_id, root_date, values)
                 cur.execute(
                     "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department,sheet_name, money, row) "
                     "VALUES (?, ?, ?, ?, ?,?, ?, ?)",
                     (order_id, date, root_order_id, root_date, headers[i],sheet_name, value, row)
                 )
-
-        operation = ws.cell(row=row, column=3).value
-
-        row += 1
+                if cur.lastrowid is None or cur.lastrowid==0:
+                    print('couldnt insert for row ',row)
 
     conn.commit(); conn.close()
+    wb.save(sourcefile)
 
 
 if __name__=="__main__":
