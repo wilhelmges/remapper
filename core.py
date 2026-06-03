@@ -66,7 +66,11 @@ def get_order_from_comment(s="(зміни в 2431)                              
         order_id = int(operation)
     else:
         order_id = re.sub(r'\([^)]*\)', '', operation).strip()
+        order_id = order_id.split()[-1]
     return order_id
 
+def format_date_for_output(date_str):
+    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d.%m.%Y")
+
 if __name__=='__main__':
-    print(get_order_from_comment(2353))
+    print(format_date_for_output('2026-03-17'))

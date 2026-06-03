@@ -1,10 +1,18 @@
 from openpyxl.styles import PatternFill
 
-def mark_neutral(ws, row):
+from enum import StrEnum
+
+class WorningColor(StrEnum):
+    ORDER_NOT_FOUND = "D9D9D9"
+    MULTIPLE_RECORD = "A9D9A9"
+    DIFFERENT_DATES = "0000FF"
+
+def mark_neutral(ws, row, fgColor="D9D9D9"):
     gray_fill = PatternFill(
         fill_type="solid",
-        fgColor="D9D9D9"  # світло-сірий
+        fgColor=fgColor  # світло-сірий
     )
 
     for cell in ws[row]:
         cell.fill = gray_fill
+

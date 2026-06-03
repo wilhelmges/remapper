@@ -71,6 +71,7 @@ def extract():
         changed = None; root_order_id = None; root_date = None
         date = datetime.date(textdate)
         changed = ws.cell(row=row, column=2).font.strike
+        impacted = 1 if changed else 0
         if changed:
             root_order_id, root_date = find_root_order_info(ws, row)
             if root_order_id is None or root_date is None:
@@ -88,9 +89,9 @@ def extract():
                     print('no sheet to add', headers[i])
                     print(row, order_id, date, changed, root_order_id, root_date, values)
                 cur.execute(
-                    "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department,sheet_name, money, row) "
-                    "VALUES (?, ?, ?, ?, ?,?, ?, ?)",
-                    (order_id, date, root_order_id, root_date, headers[i],sheet_name, value, row)
+                    "INSERT INTO wasted (order_id, order_date, root_order_id, root_date, department,sheet_name, money, row, impacted) "
+                    "VALUES (?, ?, ?, ?, ?,?, ?, ?, ?)",
+                    (order_id, date, root_order_id, root_date, headers[i],sheet_name, value, row, impacted)
                 )
                 if cur.lastrowid is None or cur.lastrowid==0:
                     print('couldnt insert for row ',row)
