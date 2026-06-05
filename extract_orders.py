@@ -6,15 +6,13 @@ import re
 from core import is_valid_date
 from datetime import datetime
 
-from core import headers, department_to_sheet, get_order_from_comment
+from core import sourcefile, headers, department_to_sheet, get_order_from_comment
+from prepare_excel import prepare_excel
 from styles import mark_neutral
-
-sourcefile = "source.xlsx"
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")
 cur = conn.cursor()
-
 
 def find_root_order_info(ws, row):
     while True:
@@ -31,6 +29,8 @@ def find_root_order_info(ws, row):
         return order_id, date
 
 def extract():
+    shutil.copy2("reserve/"+sourcefile,sourcefile)
+    prepare_excel()
     cur.execute("DELETE FROM wasted");  conn.commit()
     wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]
     last_row =  ws.max_row #8000 #9475 6078 #

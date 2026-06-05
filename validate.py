@@ -2,23 +2,20 @@ import shutil
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import sqlite3
-import re
-from core import is_valid_date
+from core import is_valid_date, sourcefile
 import datetime
+import re
 from styles import mark_neutral,worning_color
 
 from core import headers, department_to_sheet, outputfile
-import re
-
 from core import get_order_from_comment
-
 
 def get_order(s= "№106 (ОД) 08.01.2026"):
     match = re.search(r"\d+", s)
     num = int(match.group()) if match else None
     return num
 
-if __name__=="__main__":
+def validate_journal():
     year = 2026
     wb = load_workbook(outputfile, data_only=True)
     for ws in wb.worksheets:
@@ -57,3 +54,13 @@ if __name__=="__main__":
                 mark_neutral(ws, row, worning_color.DATES_PROBLEM)
 
     wb.save(outputfile)
+
+def validate_orders():
+    wb = load_workbook(sourcefile, data_only=True)
+    for ws in wb.worksheets:
+
+        sheet_name = ws.title
+        print(sheet_name)
+
+if __name__ == "__main__":
+    validate_journal()

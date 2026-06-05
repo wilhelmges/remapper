@@ -3,9 +3,9 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import re
 
-sourcefile = "source.xlsx"
 
 from datetime import datetime, date
+from core import sourcefile
 
 def is_valid_date(value):
     if value is None:
@@ -78,15 +78,6 @@ def prepare_rows(ws):
 
 
         ws.cell(row=row, column=1).value = id
-        #operation = ws.cell(row=row, column=3).value
-        # order_id = get_last_number(operation)
-        effect = remove_last_number(operation)
-        ws.cell(row=row, column=1).value = id
-        # ws.cell(row=row, column=4).value = order_id
-        # ws.cell(row=row, column=5).value = effect
-        # ws.cell(row=row, column=6).value = ws.cell(row=row, column=28).value
-
-        print(row, id, order_id, effect)
         id += 1
         row+=1
 
@@ -120,12 +111,8 @@ def delete_empty_bottom(ws:Worksheet):
         print('no empty rows')
 
 def prepare_excel():
-    shutil.copy2("накази_втрати майна  А4007.xlsx", sourcefile)
     wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
-    #print(ws['B9177'].font.strike); return
     prepare_headers(ws)
-
-    prepare_rows(ws)
     wb.save(sourcefile) #;wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
 
 

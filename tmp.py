@@ -1,4 +1,7 @@
-s = 'зміни подія 1192  976'
-s = '976'
-s='???'
-print(s.split()[-1])
+import datetime
+
+d = datetime.datetime.now()
+print(type(d), d)
+if type(d) == datetime.datetime:
+    d = d.date()
+print(type(d), d)

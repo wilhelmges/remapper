@@ -1,6 +1,10 @@
 from datetime import datetime, date
 import re
 
+sourcefile = "накази_втрати майна  А4007.xlsx"
+outputfile = "книга втрат електронний варіант.xlsx"
+
+
 def is_valid_date(value):
     if value is None:
         return False
@@ -61,7 +65,7 @@ department_to_sheet = {
 }
 
 def get_order_from_comment(s="(зміни в 2431)                               3719"):
-    operation = str(s)
+    operation = str(s).strip()
     if operation.isdigit():
         order_id = int(operation)
     else:

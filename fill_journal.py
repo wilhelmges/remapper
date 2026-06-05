@@ -12,9 +12,7 @@ from openpyxl.styles import Font
 from core import headers, department_to_sheet
 import re
 
-from core import get_order_from_comment, format_date_for_output
-
-outputfile = "output.xlsx"
+from core import outputfile, get_order_from_comment, format_date_for_output
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")
@@ -29,7 +27,6 @@ def find_start_blanc(ws):
         row += 1
 
 if __name__=="__main__":
-    shutil.copy2("книга втрат електронний варіант.xlsx", outputfile)
     year = 2026
     wb = load_workbook(outputfile, data_only=True)
     for ws in wb.worksheets:
@@ -50,6 +47,7 @@ if __name__=="__main__":
 
         i = start_blanc
         for row in rows:
+            id = int(row['id'])
             cell1 = ws.cell(row=i, column=1)
             cell1.value = str(format_date_for_output(row['order_date']));cell1.font=Font()
             cell2 = ws.cell(row=i, column=2)
@@ -57,6 +55,16 @@ if __name__=="__main__":
             cell3 = ws.cell(row=i, column=3)
             cell3.value = row['money']; cell3.font=Font()
             i+=1
+
+            cur.execute(
+                "UPDATE wasted SET filled = 1 WHERE id = ? ",
+                (id,)
+            )
+            updated_rows = cur.rowcount
+            if updated_rows == 0:
+                print("Запис не знайдено", id, sheet_name)
+            elif updated_rows == 1:
+                pass  # print("Оновлено 1 запис")
 
             root_id = row['order_id']
             cur.execute("""
@@ -80,16 +88,6 @@ if __name__=="__main__":
             i+=jmax
             if jmax==0:
                 i+=1
-
-                # cur.execute(
-                #     "UPDATE wasted SET filled = 1 WHERE id = ?",
-                #     (order_id, sheet_name)
-                # )
-                # updated_rows = cur.rowcount
-                # if updated_rows == 0:
-                #     print("Запис не знайдено", order_id, date, sheet_name)
-                # elif updated_rows == 1:
-                #     pass #print("Оновлено 1 запис")
 
 
     conn.commit()
