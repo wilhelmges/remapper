@@ -1,5 +1,6 @@
 from datetime import datetime, date
 import re
+import hashlib
 
 sourcefile = "накази_втрати майна  А4007.xlsx"
 outputfile = "книга втрат електронний варіант.xlsx"
@@ -35,6 +36,23 @@ def is_valid_date(value):
             pass
 
     return False
+
+def calculate_md5(file_path) -> str:
+    md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(1024 * 1024):
+            md5.update(chunk)
+    return md5.hexdigest()
+
+def is_valid_order_row(ws, row):
+    if ws.cell(row=row, column=2).value is None or ws.cell(row=row, column=3).value is None:
+        return False
+    textdate = ws.cell(row=row, column=2).value
+    if not is_valid_date(textdate):
+        print('cant get order or data', row, textdate)
+        return False
+    return True
+
 
 headers = ['рао', 'рао збб та р', 'зас ураж', 'бпла', 'ппо', 'нсо', 'реб', 'овт та мсп', 'реч', 'інж', 'зв', 'рхбз', 'ас', 'прод', 'мед', 'пмм', 'гео', 'кес', 'елтех', 'пожежна', 'метрол']
 sheets = ['БпЛА', 'ОВТ', 'ЗВ', 'ЗББ', 'ЗУ', 'РЕЧ', 'НСО (БТ)', 'Ел-тех', 'ІС', 'ГЕО', 'прод', 'пмм', 'СВТ (АС)', 'мед', 'КЕС( СІ-ІЗ)', 'Метрологія']
