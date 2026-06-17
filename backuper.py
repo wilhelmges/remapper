@@ -6,10 +6,9 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 from core import calculate_md5
+from config import orders
 
-SOURCE_FILE = Path(
-    r"S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\накази_втрати майна  А4007.xlsx"
-)
+SOURCE_FILE = Path(orders)
 
 BACKUP_DIR = Path("backups")
 BACKUP_DIR.mkdir(exist_ok=True)
@@ -40,7 +39,6 @@ def init_db():
 def get_db():
     conn = sqlite3.connect(DB_FILE)
     return conn
-
 
 
 def get_last_signature(conn) -> str | None:

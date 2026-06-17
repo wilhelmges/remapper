@@ -2,13 +2,13 @@ import shutil
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import sqlite3
-import re
 from core import is_valid_date
 from datetime import datetime
 
-from core import sourcefile, headers, department_to_sheet, get_order_from_comment
+from core import headers, department_to_sheet, get_order_from_comment
 from prepare_excel import prepare_excel
 from styles import mark_neutral
+from config import orders_network_url, sourcefile
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")
@@ -29,7 +29,7 @@ def find_root_order_info(ws, row):
         return order_id, date
 
 def extract():
-    shutil.copy2("reserve/"+sourcefile,sourcefile)
+    shutil.copy2(orders_network_url, sourcefile)
     prepare_excel()
     cur.execute("DELETE FROM wasted");  conn.commit()
     wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]

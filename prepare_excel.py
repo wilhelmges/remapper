@@ -1,42 +1,8 @@
-import shutil
 from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
 import re
 
-
 from datetime import datetime, date
-from core import sourcefile
-
-def is_valid_date(value):
-    if value is None:
-        return False
-
-    if isinstance(value, (datetime, date)):
-        return True
-
-    if not isinstance(value, str):
-        return False
-
-    value = value.strip()
-    if not value:
-        return False
-
-    formats = (
-        "%d.%m.%Y",
-        "%d.%m.%y",
-        "%Y-%m-%d",
-        "%d/%m/%Y",
-        "%m/%d/%Y",
-    )
-
-    for fmt in formats:
-        try:
-            datetime.strptime(value, fmt)
-            return True
-        except ValueError:
-            pass
-
-    return False
+from core import is_valid_date
 
 def validate_cancels(ws):
     for row_num in range(1, ws.max_row + 1):
@@ -88,27 +54,6 @@ def migrate_excel_sheme(ws:Worksheet):
     ws["E1"] = "effects"
     ws["F1"] = "comment"
 
-def delete_empty_bottom(ws:Worksheet):
-    start_row = None
-    empty_count = 0
-
-    for row in range(ws.max_row, 0, -1):
-        is_empty = all(
-            cell.value in (None, '')
-            for cell in ws[row]
-        )
-
-        if is_empty:
-            start_row = row
-            empty_count += 1
-        else:
-            break
-
-    if empty_count > 0:
-        print('deleting ', empty_count)
-        ws.delete_rows(start_row, empty_count)
-    else:
-        print('no empty rows')
 
 def prepare_excel():
     wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]

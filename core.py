@@ -1,10 +1,11 @@
 from datetime import datetime, date
 import re
 import hashlib
+from openpyxl.worksheet.worksheet import Worksheet
+
 
 sourcefile = "накази_втрати майна  А4007.xlsx"
 outputfile = "книга втрат електронний варіант.xlsx"
-
 
 def is_valid_date(value):
     if value is None:
@@ -53,6 +54,40 @@ def is_valid_order_row(ws, row):
         return False
     return True
 
+def get_order_from_comment(s="(зміни в 2431)                               3719"):
+    operation = str(s).strip()
+    if operation.isdigit():
+        order_id = int(operation)
+    else:
+        order_id = re.sub(r'\([^)]*\)', '', operation).strip()
+        order_id = order_id.split()[-1]
+    return order_id
+
+def format_date_for_output(date_str):
+    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d.%m.%Y")
+
+def delete_empty_bottom(ws:Worksheet):
+    start_row = None
+    empty_count = 0
+
+    for row in range(ws.max_row, 0, -1):
+        is_empty = all(
+            cell.value in (None, '')
+            for cell in ws[row]
+        )
+
+        if is_empty:
+            start_row = row
+            empty_count += 1
+        else:
+            break
+
+    if empty_count > 0:
+        print('deleting ', empty_count)
+        ws.delete_rows(start_row, empty_count)
+    else:
+        print('no empty rows')
+
 
 headers = ['рао', 'рао збб та р', 'зас ураж', 'бпла', 'ппо', 'нсо', 'реб', 'овт та мсп', 'реч', 'інж', 'зв', 'рхбз', 'ас', 'прод', 'мед', 'пмм', 'гео', 'кес', 'елтех', 'пожежна', 'метрол']
 sheets = ['БпЛА', 'ОВТ', 'ЗВ', 'ЗББ', 'ЗУ', 'РЕЧ', 'НСО (БТ)', 'Ел-тех', 'ІС', 'ГЕО', 'прод', 'пмм', 'СВТ (АС)', 'мед', 'КЕС( СІ-ІЗ)', 'Метрологія']
@@ -82,17 +117,7 @@ department_to_sheet = {
     "метрол": "Метрологія",
 }
 
-def get_order_from_comment(s="(зміни в 2431)                               3719"):
-    operation = str(s).strip()
-    if operation.isdigit():
-        order_id = int(operation)
-    else:
-        order_id = re.sub(r'\([^)]*\)', '', operation).strip()
-        order_id = order_id.split()[-1]
-    return order_id
 
-def format_date_for_output(date_str):
-    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d.%m.%Y")
 
 if __name__=='__main__':
     print(format_date_for_output('2026-03-17'))
