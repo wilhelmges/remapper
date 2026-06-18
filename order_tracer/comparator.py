@@ -1,4 +1,4 @@
-from core import calculate_md5
+from utils.core import calculate_md5
 from pathlib import Path
 from difflib import SequenceMatcher
 from get_sigmatures_from_xlsx import get_list_of_sigmatures_from_xlsx
@@ -51,8 +51,8 @@ def compare_signatures(old_rows, new_rows):
     }
 
 if __name__=='__main__':
-    oldfile = Path(r"./backups/накази_втрати майна  А4007.xlsx")
-    newfile = Path(r"./backups/накази_втрати майна  А4007_c09d904c.xlsx")
+    oldfile = Path(r"../backups/накази_втрати майна  А4007.xlsx")
+    newfile = Path(r"../backups/накази_втрати майна  А4007_c09d904c.xlsx")
     if calculate_md5(oldfile) == calculate_md5(newfile):
         print('equel files')
         exit()

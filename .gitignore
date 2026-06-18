@@ -2,5 +2,6 @@
 .idea
 *.db
 __pycache__
-backup.log
+order_tracer/backup.log
 backups
+tmp-накази_втрати майна  А4007.xlsx

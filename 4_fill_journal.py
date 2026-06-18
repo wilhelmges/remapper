@@ -1,18 +1,9 @@
-import shutil
 from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
 import sqlite3
-import re
-from core import is_valid_date
-from datetime import datetime
 from styles import mark_neutral
 from openpyxl.styles import Font
 
-
-from core import headers, department_to_sheet
-import re
-
-from core import outputfile, get_order_from_comment, format_date_for_output
+from utils.core import outputfile, format_date_for_output
 
 # Відкрити базу (або створити, якщо її немає)
 conn = sqlite3.connect("wasted.db")

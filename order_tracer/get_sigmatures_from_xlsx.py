@@ -1,9 +1,9 @@
 import hashlib
-from openpyxl import load_workbook, Workbook
+from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from datetime import datetime
 
-from core import sourcefile, is_valid_order_row
+from utils.core import sourcefile, is_valid_order_row
 
 def row_signature(ws, row=4):
     if not is_valid_order_row(ws, row):

@@ -1,14 +1,11 @@
-import shutil
 from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
-import sqlite3
-from core import is_valid_date, sourcefile
+from utils.core import is_valid_date, sourcefile
 import datetime
 import re
-from styles import mark_neutral,worning_color
+from utils.row_marker import mark_row_wcolor,Warning_color
 
-from core import headers, department_to_sheet, outputfile
-from core import get_order_from_comment
+from utils.core import outputfile
+
 
 def get_order(s= "№106 (ОД) 08.01.2026"):
     match = re.search(r"\d+", s)
@@ -42,16 +39,16 @@ def validate_journal():
                     date2 = datetime.datetime.strptime(d, "%d.%m.%y").date()
                 else:
                     date2 = None; print(" cant convert date: ", date, sheet_name, row, repr(d))
-                    mark_neutral(ws, row, worning_color.DATES_PROBLEM)
+                    mark_row_wcolor(ws, row, Warning_color.DATES_PROBLEM)
             except Exception as e:
                 print(" error while converting to date: ",date, sheet_name, row, repr(d))
-                mark_neutral(ws, row, worning_color.DATES_PROBLEM)
+                mark_row_wcolor(ws, row, Warning_color.DATES_PROBLEM)
                 date2 = date
 
             if date!=date2:
                 print(date, date2)
                 print("different dates",sheet_name, row, order_id )
-                mark_neutral(ws, row, worning_color.DATES_PROBLEM)
+                mark_row_wcolor(ws, row, Warning_color.DATES_PROBLEM)
 
     wb.save(outputfile)
 

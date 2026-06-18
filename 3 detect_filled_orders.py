@@ -1,24 +1,11 @@
-import shutil
 from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
 import sqlite3
-import re
-from core import is_valid_date
+from utils.core import is_valid_date
 import datetime
-import traceback
 
-
-from core  import outputfile,headers, department_to_sheet
-import re
-from core import get_order_from_comment
-from styles import mark_neutral, worning_color
-
-
-def get_order(s= "№106 (ОД) 08.01.2026"):
-    match = re.search(r"\d+", s)
-    num = int(match.group()) if match else None
-    return num
-
+from utils.core import get_order_from_comment
+from config import outputfile
+from utils.row_marker import mark_row_wcolor, Warning_color
 
 
 # Відкрити базу (або створити, якщо її немає)
@@ -56,7 +43,7 @@ if __name__=="__main__":
                 date = datetime.datetime.strptime(date, "%d.%m.%Y").date()
             money = ws.cell(row=row, column=3).value
             #print(type(date), sheet_name, row, date)
-            order_id = get_order(ws.cell(row=row, column=2).value)
+            order_id = get_order_from_comment(ws.cell(row=row, column=2).value)
 
             cur.execute(
                 "UPDATE wasted SET filled = 1 WHERE order_id = ? AND order_date=?  AND sheet_name = ? AND money=?",
@@ -65,12 +52,12 @@ if __name__=="__main__":
             updated_rows = cur.rowcount
             if updated_rows == 0:
                 print("Запис не знайдено", order_id, date, sheet_name)
-                mark_neutral(ws, row, worning_color.ORDER_NOT_FOUND)
+                mark_row_wcolor(ws, row, Warning_color.ORDER_NOT_FOUND)
             elif updated_rows == 1:
                 pass #print("Оновлено 1 запис")
             else:
                 print("Оновлено більше одного записа", order_id, date, sheet_name)
-                mark_neutral(ws, row, worning_color.MULTIPLE_RECORD)
+                mark_row_wcolor(ws, row, Warning_color.MULTIPLE_RECORD)
 
     conn.commit()
     conn.close()

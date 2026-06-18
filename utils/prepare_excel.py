@@ -1,5 +1,5 @@
 from openpyxl import load_workbook
-import re
+from openpyxl.worksheet.worksheet import Worksheet
 
 from datetime import datetime, date
 from core import is_valid_date
@@ -19,14 +19,6 @@ def prepare_headers(ws):
         cell.value = str(cell.value).lower().strip()
         print(cell.value)
     ws["V1"] = "елтех"
-
-def remove_last_number(s="(зміни в 2431)                               3719"):
-    if s is None:
-        return None
-    s=str(s)
-    m = re.search(r'^(.*?)([+-]?\d+)\s*$', s)
-    return m.group(1).rstrip() if m else s
-
 
 def prepare_rows(ws):
     last_row = ws.max_row
@@ -54,12 +46,10 @@ def migrate_excel_sheme(ws:Worksheet):
     ws["E1"] = "effects"
     ws["F1"] = "comment"
 
-
-def prepare_excel():
+def prepare_excel(sourcefile):
     wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
     prepare_headers(ws)
     wb.save(sourcefile) #;wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
-
 
 if __name__ == "__main__":
     prepare_excel()

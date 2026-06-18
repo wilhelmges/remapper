@@ -3,9 +3,8 @@ import re
 import hashlib
 from openpyxl.worksheet.worksheet import Worksheet
 
-
-sourcefile = "накази_втрати майна  А4007.xlsx"
-outputfile = "книга втрат електронний варіант.xlsx"
+# sourcefile = "накази_втрати майна  А4007.xlsx"
+# outputfile = "книга втрат електронний варіант.xlsx"
 
 def is_valid_date(value):
     if value is None:
@@ -63,6 +62,13 @@ def get_order_from_comment(s="(зміни в 2431)                              
         order_id = order_id.split()[-1]
     return order_id
 
+def remove_last_number(s="(зміни в 2431)                               3719"):
+    if s is None:
+        return None
+    s=str(s)
+    m = re.search(r'^(.*?)([+-]?\d+)\s*$', s)
+    return m.group(1).rstrip() if m else s
+
 def format_date_for_output(date_str):
     return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d.%m.%Y")
 
@@ -87,7 +93,6 @@ def delete_empty_bottom(ws:Worksheet):
         ws.delete_rows(start_row, empty_count)
     else:
         print('no empty rows')
-
 
 headers = ['рао', 'рао збб та р', 'зас ураж', 'бпла', 'ппо', 'нсо', 'реб', 'овт та мсп', 'реч', 'інж', 'зв', 'рхбз', 'ас', 'прод', 'мед', 'пмм', 'гео', 'кес', 'елтех', 'пожежна', 'метрол']
 sheets = ['БпЛА', 'ОВТ', 'ЗВ', 'ЗББ', 'ЗУ', 'РЕЧ', 'НСО (БТ)', 'Ел-тех', 'ІС', 'ГЕО', 'прод', 'пмм', 'СВТ (АС)', 'мед', 'КЕС( СІ-ІЗ)', 'Метрологія']
@@ -116,8 +121,6 @@ department_to_sheet = {
     "пожежна": None,
     "метрол": "Метрологія",
 }
-
-
 
 if __name__=='__main__':
     print(format_date_for_output('2026-03-17'))
