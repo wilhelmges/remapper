@@ -4,6 +4,9 @@ from pathlib import Path
 orders_network_url = r"S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\накази_втрати майна  А4007.xlsx"
 sourcefile = "tmp-накази_втрати майна  А4007.xlsx"
 outputfile = "книга втрат електронний варіант.xlsx"
+wasted_network_url = r"S:\Втрати майна\Книга обліку нестач.xlsx"
+wasted_backup = r"C:\progs\remapper\order_tracer\backups\Книга обліку нестач_dsf42fdfds3.xlsx"
+sample_xlsx = r"C:\progs\remapper\order_tracer\backups\sample.xlsx"
 
 LOG_FILE = Path("backup.log")
 logging.basicConfig(

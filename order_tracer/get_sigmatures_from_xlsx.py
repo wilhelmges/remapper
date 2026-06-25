@@ -3,7 +3,8 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from datetime import datetime
 
-from utils.core import sourcefile, is_valid_order_row
+from config import sourcefile
+from utils.core import is_valid_order_row
 
 def row_signature(ws, row=4):
     if not is_valid_order_row(ws, row):
@@ -16,6 +17,8 @@ def row_signature(ws, row=4):
         elif isinstance(value, datetime):
             value = value.isoformat()
         values.append(str(value).strip())
+    if ws.cell(row=row, column=2).font.strike:
+        values.append('-')
     data = "\x1f".join(values)
     return hashlib.md5(data.encode("utf-8")).hexdigest()
 

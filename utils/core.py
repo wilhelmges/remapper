@@ -1,7 +1,14 @@
 from datetime import datetime, date
 import re
+from typing import Optional
+from decimal import Decimal, InvalidOperation
+import math
+
 import hashlib
 from openpyxl.worksheet.worksheet import Worksheet
+from datetime import date, datetime
+from openpyxl.utils.datetime import from_excel
+
 
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
@@ -37,6 +44,125 @@ def is_valid_date(value):
 
     return False
 
+def cell_to_sqlite_date(cell) -> str | None:
+    """
+    Перетворює будь-яку Excel-ячейку в дату формату YYYY-MM-DD.
+
+    Повертає:
+        '2024-09-02' або None.
+    """
+
+    value = cell.value
+
+    # порожня ячейка
+    if value is None:
+        return None
+
+    # datetime
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+
+    # date
+    if isinstance(value, date):
+        return value.isoformat()
+
+    # Excel serial date (число)
+    if isinstance(value, (int, float)):
+        try:
+            return from_excel(value).date().isoformat()
+        except Exception:
+            return None
+
+    # рядок
+    if isinstance(value, str):
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        formats = (
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+            "%Y-%m-%d",
+            "%d-%m-%Y",
+        )
+
+        for fmt in formats:
+            try:
+                return datetime.strptime(value, fmt).date().isoformat()
+            except ValueError:
+                pass
+
+        return None
+
+    return None
+
+_NUMBER_RE = re.compile(r"(\d+)\s*$")
+def get_order_from_comment(s) -> Optional[int]:
+    if s is None:
+        return None
+
+    operation = str(s).strip()
+    if not operation:
+        return None
+
+    operation = re.sub(r"\([^)]*\)", "", operation).strip()
+
+    match = _NUMBER_RE.search(operation)
+    if match:
+        return int(match.group(1))
+
+    return None
+
+def cell_to_decimal(cell) -> Decimal | None:
+    """
+    Безпечно перетворює значення openpyxl.cell.Cell у Decimal.
+
+    Повертає:
+        Decimal - якщо значення коректне.
+        None    - якщо значення відсутнє або некоректне.
+    """
+    value = cell.value
+
+    if value is None:
+        return None
+
+    # Уже Decimal
+    if isinstance(value, Decimal):
+        return value
+
+    # Цілі числа
+    if isinstance(value, int):
+        return Decimal(value)
+
+    # float з Excel
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
+        # Через str(), щоб не тягнути двійкові похибки float
+        return Decimal(str(value))
+
+    # Рядок
+    if isinstance(value, str):
+        s = (
+            value.strip()
+            .replace("\xa0", "")   # нерозривний пробіл
+            .replace(" ", "")      # звичайний пробіл
+            .replace(",", ".")     # десяткова кома -> крапка
+        )
+
+        if not s:
+            return None
+
+        try:
+            return Decimal(s)
+        except InvalidOperation:
+            return None
+
+    # Інші типи
+    return None
+
 def calculate_md5(file_path) -> str:
     md5 = hashlib.md5()
     with open(file_path, "rb") as f:
@@ -53,7 +179,8 @@ def is_valid_order_row(ws, row):
         return False
     return True
 
-def get_order_from_comment(s="(зміни в 2431)                               3719"):
+
+def get_order_from_comment(s="(зміни в 2431)    3719"):
     operation = str(s).strip()
     if operation.isdigit():
         order_id = int(operation)
