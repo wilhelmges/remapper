@@ -2,6 +2,7 @@ from datetime import datetime, date
 import re
 from typing import Optional
 from decimal import Decimal, InvalidOperation
+from typing import Any
 import math
 
 import hashlib
@@ -98,8 +99,57 @@ def cell_to_sqlite_date(cell) -> str | None:
 
     return None
 
+def safe_decimal(value: Any) -> Decimal:
+    """
+    Безпечно перетворює значення на Decimal.
+
+    Повертає:
+        Decimal(...) - якщо перетворення успішне;
+        Decimal(0)   - якщо перетворення неможливе.
+    """
+    try:
+        if value is None:
+            return Decimal(0)
+
+        if isinstance(value, Decimal):
+            return value
+
+        if isinstance(value, int):
+            return Decimal(value)
+
+        if isinstance(value, float):
+            # Через str(), щоб уникнути похибки двійкового представлення float
+            return Decimal(str(value))
+
+        text = str(value).strip()
+        if not text:
+            return Decimal(0)
+
+        # Прибираємо пробіли між цифрами (151 150.40 -> 151150.40)
+        text = text.replace(" ", "")
+
+        return Decimal(text)
+
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal(0)
+
+def get_order_from_comment(value) -> Optional[int]:
+    value = _get_order_from_comment(value)
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        value = value.strip()
+        if not value or value.lower() == "none":
+            return None
+
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
 _NUMBER_RE = re.compile(r"(\d+)\s*$")
-def get_order_from_comment(s) -> Optional[int]:
+def _get_order_from_comment(s) -> Optional[int]:
     if s is None:
         return None
 
@@ -180,7 +230,7 @@ def is_valid_order_row(ws, row):
     return True
 
 
-def get_order_from_comment(s="(зміни в 2431)    3719"):
+def get_order_from_comment_old(s="(зміни в 2431)    3719"):
     operation = str(s).strip()
     if operation.isdigit():
         order_id = int(operation)

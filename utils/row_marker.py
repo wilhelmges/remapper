@@ -6,6 +6,8 @@ class Warning_color(StrEnum):
     ORDER_NOT_FOUND = "FF9999"  # світло-червоний
     MULTIPLE_RECORD = "A9D9A9"  # світло-зелений
     DATES_PROBLEM = "D9E2F3"  # світло-блакитний
+    DIFF_SUMS = "D9E2F3"  # світло-блакитний
+    NO_YEAR = "FF9999"
 
 
 def mark_row_wcolor(ws, row, fgColor="D9D9D9"):
