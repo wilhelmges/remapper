@@ -8,6 +8,7 @@ class Warning_color(StrEnum):
     DATES_PROBLEM = "D9E2F3"  # світло-блакитний
     DIFF_SUMS = "D9E2F3"  # світло-блакитний
     NO_YEAR = "FF9999"
+    GENERAL_CASE = "A9D9A9"  # світло-зелений
 
 
 def mark_row_wcolor(ws, row, fgColor="D9D9D9"):

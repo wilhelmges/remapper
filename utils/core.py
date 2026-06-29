@@ -1,18 +1,37 @@
 from datetime import datetime, date
 import re
-from typing import Optional
+from typing import Optional, Dict
 from decimal import Decimal, InvalidOperation
 from typing import Any
 import math
 
 import hashlib
+
+from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from datetime import date, datetime
 from openpyxl.utils.datetime import from_excel
 
+from config import sample_xlsx
+from utils.row_marker import mark_row_wcolor, Warning_color
 
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
+
+def mark_rows_from_dict(filepath, dict, color=Warning_color.GENERAL_CASE):#filepath, dict: Dict
+    dict = {
+        "БПЛА": [3],
+    }
+    wb = load_workbook(filepath, data_only=False)
+
+    for sheetname, rows in dict.items():
+        print(sheetname, rows)
+        ws: Worksheet = wb[sheetname]
+        for row in rows:
+            print(row)
+            mark_row_wcolor(ws, row, color)
+    wb.save(filepath)
+    wb.close()
 
 def is_valid_date(value):
     if value is None:
@@ -229,7 +248,6 @@ def is_valid_order_row(ws, row):
         return False
     return True
 
-
 def get_order_from_comment_old(s="(зміни в 2431)    3719"):
     operation = str(s).strip()
     if operation.isdigit():
@@ -300,4 +318,7 @@ department_to_sheet = {
 }
 
 if __name__=='__main__':
-    print(format_date_for_output('2026-03-17'))
+    dict = {
+        "БПЛА": [3],
+    }
+    mark_rows_from_dict(sample_xlsx, dict)

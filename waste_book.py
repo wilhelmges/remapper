@@ -70,12 +70,13 @@ def parse_sheet(ws: Worksheet):
             print(row, 'else')
 
 
-def check_and_define_year(ws: Worksheet):
+def check_spoiled_orders(ws: Worksheet):
     all_present = True
     last_row = ws.max_row  # 8000 #9475 6078 #
     row = 12
+    spoiled_rows = []
     for row in range(row, last_row):
-        striked = True if ws.cell(row=row, column=2).font.strike else False
+        striked = True if (ws.cell(row=row, column=2).font.strike or ws.cell(row=row, column=9).font.strike) else False
         if not striked and isinstance(ws.cell(row=row, column=9).value, float):
             year = None
             for col in range(10, 15):
@@ -85,8 +86,10 @@ def check_and_define_year(ws: Worksheet):
                     break
             if year is None:
                 print(' no year for ', row)
-                mark_row_wcolor(ws, row, Warning_color.NO_YEAR)
                 all_present = False
+                spoiled_rows.append(row)
+            else:
+                pass #ws.cell(row=row, column=1, value=year)
 
     if not all_present:
         ws.sheet_properties.tabColor = "FF0000"
@@ -98,9 +101,9 @@ def merged(ws: Worksheet):
             print("Головна комірка:", merged_range.start_cell.coordinate)
 
 if __name__ == '__main__':
-    wb = load_workbook(wasted_backup, data_only=True); #ws:Worksheet = wb["ЗББ та Р"]
-    for ws in wb.worksheets:
-        check_and_define_year(ws)
+    wb = load_workbook(wasted_backup, data_only=True); ws:Worksheet = wb["ЗББ та Р"]
+    #for ws in wb.worksheets:
+    rows = check_spoiled_orders(ws)
     wb.save(wasted_backup); wb.close()
 
 
