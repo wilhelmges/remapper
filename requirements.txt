@@ -1,3 +1,4 @@
 openpyxl
 pywin32
 pandas
+sqlmodel==0.0.39

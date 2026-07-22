@@ -3,7 +3,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from config import sample_xlsx, wasted_backup
 
 if __name__ == '__main__':
-    wb = load_workbook(sample_xlsx, data_only=True);
+    wb = load_workbook(sample_xlsx, data_only=True)
     ws:Worksheet = wb["БПЛА"]
     value = ws["I8079"].value
     print(value)

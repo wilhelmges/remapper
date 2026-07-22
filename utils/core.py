@@ -14,9 +14,16 @@ from openpyxl.utils.datetime import from_excel
 
 from config import sample_xlsx
 from utils.row_marker import mark_row_wcolor, Warning_color
-
+from enum import Enum
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
+
+
+
+def remove_duplicate_spaces(text: str) -> str:
+    return " ".join(text.split())
+
+
 
 def mark_rows_from_dict(filepath, dict, color=Warning_color.GENERAL_CASE):#filepath, dict: Dict
     dict = {
@@ -73,15 +80,12 @@ def cell_to_sqlite_date(cell) -> str | None:
     """
 
     value = cell.value
-
     # порожня ячейка
     if value is None:
         return None
-
     # datetime
     if isinstance(value, datetime):
         return value.date().isoformat()
-
     # date
     if isinstance(value, date):
         return value.isoformat()
@@ -318,7 +322,8 @@ department_to_sheet = {
 }
 
 if __name__=='__main__':
-    dict = {
-        "БПЛА": [3],
-    }
-    mark_rows_from_dict(sample_xlsx, dict)
+    print(waste_status('ЄАС №1114 від 17.04.2026'))
+    # dict = {
+    #     "БПЛА": [3],
+    # }
+    # mark_rows_from_dict(sample_xlsx, dict)
