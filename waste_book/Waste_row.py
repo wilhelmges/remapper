@@ -6,10 +6,10 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from config import wasted_backup
-from utils.core import remove_duplicate_spaces, cell_to_sqlite_date, get_order_from_comment
+from utils.core import remove_duplicate_spaces, cell_to_sqlite_date, get_order_from_comment, PrettyProperties
 from waste_core import Waste_status
 
-class Waste_row:
+class Waste_row(PrettyProperties):
     def __init__(self, wb: Workbook, sheet_name: str, row:int):
         self.wb = wb
         self.ws: Worksheet = wb[sheet_name]
@@ -60,7 +60,7 @@ class Waste_row:
             return Waste_status.BLANK
 
     @property
-    def descstatus(self):
+    def status_description(self):
         if not isinstance(self.cell(16).value, str):
             return ''
         return self.cell(16).value
@@ -83,20 +83,26 @@ class Waste_row:
     #item fields
     @property
     def title(self):
-        return self.cell(4).value
+        return '' + str(self.cell(4).value)
 
     @property
     def amount(self):
+        if self.cell(8).value is None:
+            return None
         return float(self.cell(8).value)
 
     @property
     def is_datarow(self):
-        return self.sqldate and self.ordernum
+        if self.sqldate and self.ordernum:
+            return True
 
     @property
     def is_striken(self):
         status = self.status
-        return self.cell(2).font.strike or self.cell(3).font.strike or self.cell(4).font.strike  or self.cell(9).font.strike or status == Waste_status.CANCELED or status == Waste_status.UPDATED
+        return (self.cell(2).font.strike or self.cell(3).font.strike
+                or self.cell(4).font.strike  or self.cell(9).font.strike
+                or status == Waste_status.CANCELED
+                or status == Waste_status.UPDATED)
 
     def is_year_needed(self):
         status = self.waste_status()
@@ -122,7 +128,7 @@ if __name__=='__main__':
     wb = load_workbook(wasted_backup, data_only=True)
     sheet_name = 'БПЛА'
     ws = wb[sheet_name]
-    wr: Waste_row = Waste_row(wb, sheet_name, 13069)
+    wr: Waste_row = Waste_row(wb, sheet_name, 13182)
     print(wr.title, wr.amount)
     print(wr.is_striken)
     exit(0)

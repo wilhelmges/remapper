@@ -13,11 +13,17 @@ from utils.row_marker import Warning_color, mark_row_wcolor
 from database.models import TitleWastebook, OrderWasteAccountBook
 
 from config import wasted_backup as file_path, sample_xlsx, wasted_backup  # "data.xlsx"
-from Waste_row import Waste_row
+from row_factory import row_factory
 from waste_core import Waste_status, waste_status
 
 sheets = ['РАО', 'ЗББ та Р', 'Зас ураж', 'НСО', 'БПЛА', 'ППО', 'ОВТ та МСП', 'РЕБ', 'Інж', 'РХБЗ', 'Реч', 'Звяз', 'Прод', 'ПММ', 'Мед', 'Авто', 'КЕС', 'Елек', 'Пожежна', 'Засоби розвідки', 'Гео', 'Метр']
 from waste_core import sheets_normal
+
+from sqlmodel import Session
+from database.mysqlmodel import engine
+from database.models import Test2, OrderWasteAccountBook, TitleWastebook
+from database.Repository import Repository
+from database.utils import native_clear_table_rows
 
 def parse_sheet_legacy(ws: Worksheet):
     last_row =  ws.max_row # 8000 #9475 6078 #
@@ -66,189 +72,52 @@ def parse_sheet_legacy(ws: Worksheet):
         else:
             print(row, 'else')
 
-def is_guilty_person(value):
-    status = waste_status(value)
-    if value == Waste_status.GUILTED:
-        return True
-    return False
-
-def canceled_or_updated(ws: Worksheet, row: int):
-    if (ws.cell(row=row, column=2).font.strike or ws.cell(row=row, column=9).font.strike):
-        return True
-    if isinstance(ws.cell(row=row, column=16).value,str):
-        status = ws.cell(row=row, column=16).value.lower()
-        if ('скасован' in status) or ('втратив чинність' in status):
-            return True
-
-def get_wastetitle(ws: Worksheet, row: int):
-    return TitleWastebook(str=ws.cell(row=row, column=4).value, total_for_items=ws.cell(row=row, column=8).value)
-
-def get_wasteorder(ws: Worksheet, row: int):
-    return OrderWasteAccountBook(date=cell_to_sqlite_date(ws.cell(row=row, column=2)))
-
-def check_spoiled_orders(ws: Worksheet):
-    all_present = True
-    last_row = ws.max_row  # 8000 #9475 6078 #
-    row = 12
-    spoiled_rows = []
-    for row in range(row, last_row):
-        striked = True if (ws.cell(row=row, column=2).font.strike or ws.cell(row=row, column=9).font.strike) else False
-        if canceled_or_updated(ws, row) or is_guilty_person(ws.cell(row=row, column=16).value):
-            continue
-        elif isinstance(ws.cell(row=row, column=9).value, float):
-            year = None
-            for col in range(10, 15):
-                if isinstance(ws.cell(row=row, column=col).value, float):
-                    year = 2012 + col
-                    #print(row, col, year)
-                    break
-            if year is None:
-                print(' no year for ', row,ws.cell(row=row, column=16).value)
-                all_present = False
-                spoiled_rows.append(row)
-            else:
-
-                pass #ws.cell(row=row, column=1, value=year)
-
-    return spoiled_rows
-
-def year_servnumb_forrao(col):
-    ch,zal = divmod(col-10, 3)
-    year = 2022 + zal
-    return year, ch+1
-
-def check_spoiled_orders_forrao(ws):
-    all_present = True
-    last_row=2983 # ws.max_row  # 8000 #9475 6078 #
-    row = 12
-    spoiled_rows = []
-    for row in range(row, last_row):
-        striked = True if (ws.cell(row=row, column=2).font.strike or ws.cell(row=row, column=9).font.strike) else False
-        if canceled_or_updated(ws, row) or is_guilty_person(ws.cell(row=row, column=16).value):
-            continue
-        elif isinstance(ws.cell(row=row, column=9).value, float):
-            year = None
-            for col in range(10, 19):
-                if isinstance(ws.cell(row=row, column=col).value, float):
-                    year, serv = year_servnumb_forrao(col)
-                    # print(row, col, year)
-                    break
-            if year is None:
-                print(' no year for ', row, ws.cell(row=row, column=19).value)
-                all_present = False
-                spoiled_rows.append(row)
-            else:
-                pass  # ws.cell(row=row, column=1, value=year)
-
-    return spoiled_rows
-
-def merged(ws: Worksheet, cell = "D6"):
-    for merged_range in ws.merged_cells.ranges:
-        if cell in merged_range:
-            coords = merged_range.start_cell.coordinate
-            print("Головна комірка:", coords)
-            value = ws[coords].value
-            print(ws[coords].value)
-            print(merged_range.min_row)
-            print(merged_range.max_row)
-            return
-
-def is_actual_row(ws: Worksheet, row):
-    d = cell_to_sqlite_date(ws.cell(row=row, column=2))
-    n = get_order_from_comment(ws.cell(row=row, column=3).value)
-    if d is None or n is None:
-        #print('no d or n')
-        return False
-    s = ws.cell(row=row, column=2).font.strike
-    if s == True:
-        return False
-    return True
-
-def get_total(ws: Worksheet, row):
-    if not isinstance(ws.cell(row=row, column=9).value, float):
-        return None
-    return Decimal(ws.cell(row=row, column=9).value)
-
-def get_order_year(ws: Worksheet, row: int):
-    if canceled_or_updated(ws, row) or is_guilty_person(ws.cell(row=row, column=16).value):
-        return None
-    if isinstance(ws.cell(row=row, column=9).value, float):
-        year = None
-        for col in range(10, 15):
-            if isinstance(ws.cell(row=row, column=col).value, float):
-                year = 2012 + col
-                # print(row, col, year)
-                break
-        if year is None:
-            print(' no year for ', row, ws.cell(row=row, column=16).value)
-            all_present = False
-        else:
-            return year # ws.cell(row=row, column=1, value=year)
-
 def parse_by_sheetname(wb: Workbook, sheetname: str):
     ws = wb[sheetname]
-    last_row = ws.max_row  # 8000 #9475 6078 #
-    previous_order_num = None; set_total_sum = 0
-    for row in range(last_row,7,-1):
-        wr = Waste_row(wb, sheet_name, row)
+    uni_waste_row = row_factory(sheetname)
 
+    with Session(engine) as session:
+        orepo = Repository(OrderWasteAccountBook, session)
+        trepo = Repository(TitleWastebook, session)
+
+        last_row = ws.max_row  # 8000 #9475 6078 #
+        first_row =  13170 #7
+        previous_order_num = None; set_total_sum = 0
         order_num = None
-        if wr.is_datarow:
-            if wr.ordernum is not None and wr.ordernum != order_num:
-                order_num =  wr.ordernum
-            else:
-                pass
-            print(wr.cell(16).value)
-        # if is_actual_row(ws, row) and not waste_row.is_guilty_person():
-        #     year = get_order_year(ws, row)
-        #     total_sum = get_total(ws, row)
-        #     if total_sum and year is None:
-        #         print('cant define year for row ', row)
-        # else:
-        #     pass
+        for row in range(last_row,first_row,-1):
+            wr = uni_waste_row(wb, sheet_name, row)
+            if wr.is_datarow:
+                print(order_num, str(wr.status.value))
+
+                if wr.ordernum is not None and wr.ordernum != order_num:
+                    order_num = wr.ordernum
+                    order = orepo.create(OrderWasteAccountBook(
+                        ordernum=wr.ordernum,date = wr.sqldate, totalsum=wr.total_sum,
+                        status=wr.status.value, status_description=wr.status_description, year=wr.year,
+                        eventyear = wr.year, strike=wr.is_striken, unit = sheetname,
+                        sheetrow = row
+                    ))
+                else:
+                    pass
+                item = trepo.create(TitleWastebook(title=wr.title,amount=wr.amount, sheetrow=row, order_id=order.id))
 
 if __name__ == '__main__':
     wb = load_workbook(wasted_backup, data_only=True)
-    sheet_name = 'Реч'
+    sheet_name = 'БПЛА'
     ws = wb[sheet_name]
-    parse_by_sheetname(wb, sheet_name)
-    exit(0)
-    wr: Waste_row = Waste_row(wb, sheet_name, 10454)
-    print(wr.is_year_needed());
+    native_clear_table_rows(['orders_wasteaccountbook', 'titles_wastebook'])
+
+    parse_by_sheetname(wb, sheet_name); exit(0)
 
     for sheet_name in sheets_normal:
         ws = wb[sheet_name]
         print(sheet_name)
         parse_by_sheetname(wb, sheet_name);
+    exit(0)
+
 
     exit(0)
 
-    last_row = ws.max_row  # 8000 #9475 6078 #
-    previous_order_num = None;
-    set_total_sum = 0
-    for row in range(7, last_row):
-        status = waste_status(ws.cell(row=row, column=16).value)
-        if status == Waste_status.ETC:
-            print(row, ws.cell(row=row, column=16).value)
-    exit(0)
-
-    print(is_actual_row(ws, 9936))
-    print(get_order_year(ws, 4584)); exit(0)
-    #print(canceled_or_updated(ws, 10454)); exit()
-
-    for ws in wb.worksheets:
-        print(ws.title)
-        if ws.title in ['Count', 'Метр']:
-            continue
-        elif ws.title == "РАО":
-            rows = check_spoiled_orders_forrao(ws)
-            print(len(rows))
-        else:
-            rows = check_spoiled_orders(ws)
-            if len(rows)>0:
-                print(ws.title, rows)
-
-    #wb.save(wasted_backup); wb.close()
 
 
 

@@ -5,3 +5,5 @@ def year_servnumb_forrao(row):
 
 for row in range(10,19):
     print(year_servnumb_forrao(row))
+
+# print(year_servnumb_forrao(10))

@@ -4,8 +4,9 @@ from typing import Optional, Dict
 from decimal import Decimal, InvalidOperation
 from typing import Any
 import math
-
 import hashlib
+import inspect
+
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -18,12 +19,32 @@ from enum import Enum
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
 
+class PrettyProperties:
+    def __repr__(self):
+        props = []
+        for name, _ in inspect.getmembers(type(self), lambda x: isinstance(x, property)):
+            try:
+                value = getattr(self, name)
+            except Exception as e:
+                value = f"<Error: {e}>"
+            props.append(f"{name}={value!r}")
+        return f"{type(self).__name__}({', '.join(props)})"
 
+def print_properties(obj):
+    props = inspect.getmembers(type(obj), lambda x: isinstance(x, property))
+    if not props:
+        print("No @property attributes")
+        return
+    width = max(len(name) for name, _ in props)
+    for name, _ in props:
+        try:
+            value = getattr(obj, name)
+        except Exception as e:
+            value = f"<Error: {e}>"
+        print(f"{name:<{width}} : {value}")
 
 def remove_duplicate_spaces(text: str) -> str:
     return " ".join(text.split())
-
-
 
 def mark_rows_from_dict(filepath, dict, color=Warning_color.GENERAL_CASE):#filepath, dict: Dict
     dict = {

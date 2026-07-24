@@ -1,5 +1,7 @@
 from decimal import Decimal
-from sqlmodel import SQLModel, Field, Column, Numeric
+from typing import Optional
+
+from sqlmodel import SQLModel, Field, Column, Numeric, Relationship
 from enum import Enum
 
 class OrderStatus(str, Enum):
@@ -10,26 +12,34 @@ class OrderStatus(str, Enum):
 
 class OrderWasteAccountBook(SQLModel, table=True):
     __tablename__ = "orders_wasteaccountbook"
-
     id: int | None = Field(default=None, primary_key=True)
     date: str
     ordernum: int | None = None
     totalsum: Decimal | None = None
     eventyear: int | None = None
-    status: OrderStatus | None = None
+    status: str | None = None
     status_description: str | None = None
+    strike: bool
+    superorder_id: int | None
+    unit: str | None
+    sheetrow: int
+
+    titles: list["TitleWastebook"] = Relationship(back_populates="order")
 
 class TitleWastebook(SQLModel, table=True):
     __tablename__ = "titles_wastebook"
-
     id: int | None = Field(default=None, primary_key=True)
     title: str
-    order_id: int | None = None
-    total_for_items: Decimal | None = Field(
+    order_id: int | None = Field(
         default=None,
-        sa_column=Column(Numeric)
+        foreign_key="orders_wasteaccountbook.id",
+        index=True,
     )
-    service_str: int | None = None
+    amount: float
+    sheetrow: int
+    #service_str: int | None = None
+
+    order: OrderWasteAccountBook | None = Relationship(back_populates="titles")
 
 
 class Test2(SQLModel, table=True):
