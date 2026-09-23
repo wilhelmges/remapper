@@ -6,16 +6,16 @@ from typing import Any
 import math
 import hashlib
 import inspect
-
-
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from datetime import date, datetime
 from openpyxl.utils.datetime import from_excel
-
-from config import sample_xlsx
-from utils.row_marker import mark_row_wcolor, Warning_color
 from enum import Enum
+import shutil
+
+from waste_keeper.config import sample_xlsx
+from waste_keeper.utils.row_marker import mark_row_wcolor, Warning_color
+from waste_keeper.config import property_loss_orders_readonly, tmp_property_loss_orders
+
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
 
@@ -101,6 +101,55 @@ def cell_to_sqlite_date(cell) -> str | None:
     """
 
     value = cell.value
+    # порожня ячейка
+    if value is None:
+        return None
+    # datetime
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    # date
+    if isinstance(value, date):
+        return value.isoformat()
+
+    # Excel serial date (число)
+    if isinstance(value, (int, float)):
+        try:
+            return from_excel(value).date().isoformat()
+        except Exception:
+            return None
+
+    # рядок
+    if isinstance(value, str):
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        formats = (
+            "%d.%m.%Y",
+            "%d/%m/%Y",
+            "%Y-%m-%d",
+            "%d-%m-%Y",
+        )
+
+        for fmt in formats:
+            try:
+                return datetime.strptime(value, fmt).date().isoformat()
+            except ValueError:
+                pass
+
+        return None
+
+    return None
+
+def value_to_sqlite_date(value) -> str | None:
+    """
+    Перетворює будь-яке значення в дату формату YYYY-MM-DD.
+
+    Повертає:
+        '2024-09-02' або None.
+    """
     # порожня ячейка
     if value is None:
         return None
@@ -314,6 +363,9 @@ def delete_empty_bottom(ws:Worksheet):
     else:
         print('no empty rows')
 
+def grap_operable_property_loss_orders():
+    shutil.copy2(property_loss_orders_readonly, tmp_property_loss_orders)
+
 headers = ['рао', 'рао збб та р', 'зас ураж', 'бпла', 'ппо', 'нсо', 'реб', 'овт та мсп', 'реч', 'інж', 'зв', 'рхбз', 'ас', 'прод', 'мед', 'пмм', 'гео', 'кес', 'елтех', 'пожежна', 'метрол']
 sheets = ['БпЛА', 'ОВТ', 'ЗВ', 'ЗББ', 'ЗУ', 'РЕЧ', 'НСО (БТ)', 'Ел-тех', 'ІС', 'ГЕО', 'прод', 'пмм', 'СВТ (АС)', 'мед', 'КЕС( СІ-ІЗ)', 'Метрологія']
 
@@ -343,7 +395,7 @@ department_to_sheet = {
 }
 
 if __name__=='__main__':
-    print(waste_status('ЄАС №1114 від 17.04.2026'))
+    grap_operable_property_loss_orders()
     # dict = {
     #     "БПЛА": [3],
     # }

@@ -1,8 +1,10 @@
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
-
 from datetime import datetime, date
-from core import is_valid_date
+
+from waste_keeper.utils.core import grap_operable_property_loss_orders, is_valid_date
+from waste_keeper.config import tmp_property_loss_orders
+
 
 def validate_cancels(ws):
     for row_num in range(1, ws.max_row + 1):
@@ -52,4 +54,5 @@ def prepare_excel(sourcefile):
     wb.save(sourcefile) #;wb = load_workbook(sourcefile);  ws:Worksheet = wb["Sheet1"]
 
 if __name__ == "__main__":
-    prepare_excel()
+    grap_operable_property_loss_orders()
+    prepare_excel(tmp_property_loss_orders)

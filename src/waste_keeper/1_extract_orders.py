@@ -1,17 +1,19 @@
-import shutil
+
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 import sqlite3
-from utils.core import is_valid_date
 from datetime import datetime
 
-from utils.core import headers, department_to_sheet, get_order_from_comment
-from utils.prepare_excel import prepare_excel
-from utils.row_marker import mark_row_wcolor, Warning_color
-from config import orders_network_url, sourcefile
+from waste_keeper.utils.core import headers, department_to_sheet, get_order_from_comment
+from waste_keeper.utils.prepare_excel import prepare_excel
+from waste_keeper.utils.row_marker import mark_row_wcolor, Warning_color
+from waste_keeper.config import orders_wide
+from waste_keeper.utils.core import grap_operable_property_loss_orders, is_valid_date
+from waste_keeper.config import db_path, tmp_property_loss_orders
+from waste_keeper.domain.property_loss_orders import Property_loss_orders
 
 # Відкрити базу (або створити, якщо її немає)
-conn = sqlite3.connect("wasted.db")
+conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
 def find_root_order_info(ws, row):
@@ -29,11 +31,13 @@ def find_root_order_info(ws, row):
         return order_id, date
 
 def _extract():
-    shutil.copy2(orders_network_url, sourcefile)
-    prepare_excel(sourcefile)
+    #grap_operable_property_loss_orders()
+    #cur.execute("DELETE FROM wasted");  conn.commit(); conn.close(); exit()
 
-    cur.execute("DELETE FROM wasted");  conn.commit()
-    wb = load_workbook(sourcefile, data_only=True); ws:Worksheet = wb["Sheet1"]
+    wb = load_workbook(tmp_property_loss_orders, data_only=True); ws:Worksheet = wb["Sheet1"]
+
+    plo: Property_loss_orders = Property_loss_orders(ws, 14118)
+
     last_row =  ws.max_row #8000 #9475 6078 #
     row = 5995
 

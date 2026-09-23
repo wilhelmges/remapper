@@ -2,7 +2,8 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from config import orders_wide
 from utils.Xls_row import XlsRow
-from utils.core import PrettyProperties
+
+from waste_keeper.utils.core import PrettyProperties
 
 class Waste_wide_row(XlsRow):
     def __init__(self, ws: Worksheet, row:int):
