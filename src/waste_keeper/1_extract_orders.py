@@ -43,15 +43,14 @@ def iterate_orders():
     row = 5996
 
     with SessionFactory() as session:
-        session.exec(delete(Property_loss_order)); session.commit()
+        #session.exec(delete(Property_loss_order)); session.commit()
 
         for num in range(last_row, row-1, -1):
-            print(num)
             dplo = domain_Property_loss_order(ws, num)
-            if dplo.isorder:
-                plo: Property_loss_order  = Property_loss_order.from_excel(ws, num)
-                session.add(plo)
-                session.commit()
+            # if dplo.isorder:
+            #     plo: Property_loss_order  = Property_loss_order.from_excel(ws, num)
+            #     session.add(plo)
+            #     session.commit()
                 #losseslst: list[float] = get_list(ws, num)
 
 

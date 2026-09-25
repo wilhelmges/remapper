@@ -10,6 +10,9 @@ tmp_property_loss_orders = PROJECT_DIR /"data"/'tmp-накази_втрати м
 shortage_ledger_readonly = r'S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\Книга обліку нестач.xlsx'
 tmp_shortage_ledger = PROJECT_DIR /"data"/'tmp-Книга обліку нестач.xlsx'
 
+electronic_loss_book_readonly = r'S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\книга втрат електронний варіант 25 вересня 2026.xlsx'
+tmp_electronic_loss_book = PROJECT_DIR /"data"/'tmp-книга втрат електронний варіант.xlsx'
+
 # orders_wide = r"order_tracer\backups\накази_втрати майна  А4007.xlsx"
 # sourcefile = "tmp-накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"

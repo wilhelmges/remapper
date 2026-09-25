@@ -34,9 +34,6 @@ if __name__ == "__main__":
     if ws.cell(row=7004, column=27).value == 'зміни наказом №1543 від 09.03.20226':
         ws.cell(row=7004, column=27).value='зміни наказом №1543 від 09.03.2026'
 
-    if ws.cell(row=7004, column=27).value == 'зміни наказом №1543 від 09.03.20226':
-        ws.cell(row=7004, column=27).value='зміни наказом №1543 від 09.03.2026'
-
     if ws.cell(row=6979, column=27).value == 'зміни наказом 6723 від 05.11.2024':
         ws.cell(row=6979, column=27).value='зміни наказом №6723 від 05.11.2024'
 

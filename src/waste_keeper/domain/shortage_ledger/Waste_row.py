@@ -1,13 +1,12 @@
 import datetime
-from decimal import Decimal
 
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from config import wasted_backup
-from utils.core import remove_duplicate_spaces, cell_to_sqlite_date, get_order_from_comment, PrettyProperties
-from waste_core import Waste_status
+from waste_keeper.config import tmp_shortage_ledger
+from waste_keeper.utils.core import remove_duplicate_spaces, cell_to_sqlite_date, get_order_from_comment, PrettyProperties
+from waste_keeper.domain.shortage_ledger.waste_core import Waste_status
 
 class Waste_row(PrettyProperties):
     def __init__(self, wb: Workbook, sheet_name: str, row:int):
@@ -125,10 +124,10 @@ class Waste_row(PrettyProperties):
         return False
 
 if __name__=='__main__':
-    wb = load_workbook(wasted_backup, data_only=True)
+    wb = load_workbook(tmp_shortage_ledger, data_only=True)
     sheet_name = 'БПЛА'
     ws = wb[sheet_name]
     wr: Waste_row = Waste_row(wb, sheet_name, 13182)
-    print(wr.title, wr.amount)
+    print(wr.ordernum,wr.sqldate, wr.amount)
     print(wr.is_striken)
     exit(0)

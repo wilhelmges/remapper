@@ -15,7 +15,6 @@ from datetime import date
 
 from waste_keeper.config import sample_xlsx
 from waste_keeper.utils.row_marker import mark_row_wcolor, Warning_color
-from waste_keeper.config import property_loss_orders_readonly, tmp_property_loss_orders, shortage_ledger_readonly, tmp_shortage_ledger
 
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
@@ -385,9 +384,7 @@ def safe_int(value: str) -> int | None:
 def grap_operable_property_loss_orders():
     shutil.copy2(property_loss_orders_readonly, tmp_property_loss_orders)
 
-def get_last_excel_files():
-    shutil.copy2(property_loss_orders_readonly, tmp_property_loss_orders)
-    shutil.copy2(shortage_ledger_readonly, tmp_shortage_ledger)
+
 
 #date oh headers 23/09/2026
 headers = ['РАО', 'РАО ЗББ та Р', 'Зас УРАЖ', 'БПЛА', 'ППО', 'НСО', 'РЕБ', 'ОВТ та МСП', 'реч', 'інж', 'зв', 'РХБЗ', 'АС', 'прод', 'мед', 'ПММ', 'гео', 'кес', 'ел-тех', 'пожежна', 'Інженерна', 'засоби розвідки', 'метрол']
