@@ -7,12 +7,15 @@ db_path = PROJECT_DIR /"data"/"wasted.db"
 property_loss_orders_readonly = r'S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\накази_втрати майна  А4007.xlsx'
 tmp_property_loss_orders = PROJECT_DIR /"data"/'tmp-накази_втрати майна  А4007.xlsx'
 
-orders_wide = r"order_tracer\backups\накази_втрати майна  А4007.xlsx"
-sourcefile = "tmp-накази_втрати майна  А4007.xlsx"
-outputfile = "книга втрат електронний варіант.xlsx"
-wasted_network_url = r"S:\Втрати майна\Книга обліку нестач.xlsx"
+shortage_ledger_readonly = r'S:\Втрати майна\1._ Книга втрат та нестач А 4007\В_Ч А4007\Книга обліку нестач.xlsx'
+tmp_shortage_ledger = PROJECT_DIR /"data"/'tmp-Книга обліку нестач.xlsx'
 
-wasted_backup = r"C:\progs\remapper\order_tracer\backups\Книга обліку нестач.xlsx"
+# orders_wide = r"order_tracer\backups\накази_втрати майна  А4007.xlsx"
+# sourcefile = "tmp-накази_втрати майна  А4007.xlsx"
+# outputfile = "книга втрат електронний варіант.xlsx"
+# wasted_network_url = r"S:\Втрати майна\Книга обліку нестач.xlsx"
+#
+# wasted_backup = r"C:\progs\remapper\order_tracer\backups\Книга обліку нестач.xlsx"
 sample_xlsx = r"C:\progs\remapper\order_tracer\backups\sample.xlsx"
 
 import logging

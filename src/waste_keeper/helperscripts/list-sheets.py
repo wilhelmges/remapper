@@ -1,8 +1,8 @@
 from openpyxl import load_workbook
 
 # Шлях до Excel-файлу
-from config import wasted_backup as file_path # "data.xlsx"
-wb = load_workbook(file_path)
+from waste_keeper.config import tmp_shortage_ledger # "data.xlsx"
+wb = load_workbook(tmp_shortage_ledger)
 
 # Вивести список усіх листів
 print("Листи у файлі:")

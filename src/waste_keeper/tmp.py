@@ -1,6 +1,10 @@
-a='7033'
-el = (a.split(' '))
-print(el[-1])
+from datetime import datetime
+
+from waste_keeper.utils.core import value_to_pydate, value_to_sqlite_date
+s = '30/3/26'
+#print(datetime.strptime(s, '%d/%m/%y').date().isoformat())
+print(value_to_sqlite_date(s))
+
 
 # def year_servnumb_forrao(row):
 #     ch,zal = divmod(row-10, 3)

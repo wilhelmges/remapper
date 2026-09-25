@@ -1,9 +1,10 @@
-from models import Test2, OrderWasteAccountBook, TitleWastebook
-from Repository import Repository
-from sqlmodel import Session
-from mysqlmodel import engine
+import re
 
-print (["a","b"] in "abced")
+s ="(зміни в 5602; 318)                       5469"
+result = re.sub(r"\([^)]*\)", "", s).strip()
+
+print(result)
+
 # with Session(engine) as session:
 #     # repo = Repository(Test2, session)
 #     # t = repo.create(Test2(title='gfdgdfg'))

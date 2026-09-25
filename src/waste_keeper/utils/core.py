@@ -11,10 +11,11 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.utils.datetime import from_excel
 from enum import Enum
 import shutil
+from datetime import date
 
 from waste_keeper.config import sample_xlsx
 from waste_keeper.utils.row_marker import mark_row_wcolor, Warning_color
-from waste_keeper.config import property_loss_orders_readonly, tmp_property_loss_orders
+from waste_keeper.config import property_loss_orders_readonly, tmp_property_loss_orders, shortage_ledger_readonly, tmp_shortage_ledger
 
 # sourcefile = "накази_втрати майна  А4007.xlsx"
 # outputfile = "книга втрат електронний варіант.xlsx"
@@ -92,15 +93,14 @@ def is_valid_date(value):
 
     return False
 
-def cell_to_sqlite_date(cell) -> str | None:
+def cell_to_sqlite_date(value) -> str | None:
     """
-    Перетворює будь-яку Excel-ячейку в дату формату YYYY-MM-DD.
+    Перетворює будь-яке значення в дату формату YYYY-MM-DD.
 
     Повертає:
         '2024-09-02' або None.
     """
 
-    value = cell.value
     # порожня ячейка
     if value is None:
         return None
@@ -131,6 +131,7 @@ def cell_to_sqlite_date(cell) -> str | None:
             "%d/%m/%Y",
             "%Y-%m-%d",
             "%d-%m-%Y",
+            "%d/%m/%y",
         )
 
         for fmt in formats:
@@ -180,6 +181,7 @@ def value_to_sqlite_date(value) -> str | None:
             "%d/%m/%Y",
             "%Y-%m-%d",
             "%d-%m-%Y",
+            '%d/%m/%y',
         )
 
         for fmt in formats:
@@ -191,6 +193,9 @@ def value_to_sqlite_date(value) -> str | None:
         return None
 
     return None
+
+def value_to_pydate(value)->date:
+    return date.fromisoformat(value_to_sqlite_date(value))
 
 def safe_decimal(value: Any) -> Decimal:
     """
@@ -363,11 +368,33 @@ def delete_empty_bottom(ws:Worksheet):
     else:
         print('no empty rows')
 
+def safe_int(value: str) -> int | None:
+    if not isinstance(value, str):
+        return None
+
+    value = value.lstrip()
+
+    digits = ""
+    for char in value:
+        if not char.isdigit():
+            break
+        digits += char
+
+    return int(digits) if digits else None
+
 def grap_operable_property_loss_orders():
     shutil.copy2(property_loss_orders_readonly, tmp_property_loss_orders)
 
-headers = ['рао', 'рао збб та р', 'зас ураж', 'бпла', 'ппо', 'нсо', 'реб', 'овт та мсп', 'реч', 'інж', 'зв', 'рхбз', 'ас', 'прод', 'мед', 'пмм', 'гео', 'кес', 'елтех', 'пожежна', 'метрол']
-sheets = ['БпЛА', 'ОВТ', 'ЗВ', 'ЗББ', 'ЗУ', 'РЕЧ', 'НСО (БТ)', 'Ел-тех', 'ІС', 'ГЕО', 'прод', 'пмм', 'СВТ (АС)', 'мед', 'КЕС( СІ-ІЗ)', 'Метрологія']
+def get_last_excel_files():
+    shutil.copy2(property_loss_orders_readonly, tmp_property_loss_orders)
+    shutil.copy2(shortage_ledger_readonly, tmp_shortage_ledger)
+
+#date oh headers 23/09/2026
+headers = ['РАО', 'РАО ЗББ та Р', 'Зас УРАЖ', 'БПЛА', 'ППО', 'НСО', 'РЕБ', 'ОВТ та МСП', 'реч', 'інж', 'зв', 'РХБЗ', 'АС', 'прод', 'мед', 'ПММ', 'гео', 'кес', 'ел-тех', 'пожежна', 'Інженерна', 'засоби розвідки', 'метрол']
+
+#date oh sheet names 24/09/2026
+sheets = ['ЗББ та Р', 'Зас ураж', 'НСО', 'БПЛА', 'ППО', 'ОВТ та МСП', 'РЕБ', 'Реч', 'Звяз', 'Прод', 'ПММ', 'Мед', 'Авто', 'КЕС', 'Елек', 'Інженерна', 'Пожежна', 'Засоби розвідки', 'Гео', 'Метр', 'РАО', 'РХБЗ', 'Інж']
+
 
 department_to_sheet = {
     None: None,
@@ -395,7 +422,7 @@ department_to_sheet = {
 }
 
 if __name__=='__main__':
-    grap_operable_property_loss_orders()
+    get_last_excel_files()
     # dict = {
     #     "БПЛА": [3],
     # }
