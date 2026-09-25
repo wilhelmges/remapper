@@ -53,4 +53,7 @@ if __name__ == "__main__":
     if ws.cell(row=7672, column=3).value == '(зміни в 5436(5649)                       2307':
         ws.cell(row=7672, column=3).value='(зміни в 5436(5649))                       2307'
 
+    if ws.cell(row=7119, column=3).value == '(зміни в наказ (6182)                   6534':
+        ws.cell(row=7119, column=3).value='(зміни в наказ (6182))                   6534'
+
     wb.save(tmp_property_loss_orders)

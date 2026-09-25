@@ -21,6 +21,8 @@ class Property_loss_order(SQLModel, table=True):
 
     description: str|None = None
 
+    excel_rownum: int
+
     @classmethod
     def from_excel(cls, ws, num):
         plo: domain_Property_loss_order = domain_Property_loss_order(ws, num)
@@ -34,6 +36,7 @@ class Property_loss_order(SQLModel, table=True):
             cancelling_order_date=plo.canceled_by_orderdate,
             effects_to_order_num=plo.effects_to_order_num,
             description=plo.description,
+            excel_rownum = num
         )
 
 if __name__ == '__main__':

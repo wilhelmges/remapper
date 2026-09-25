@@ -35,6 +35,24 @@ def remove_parentheses(text):
 
     return ' '.join(''.join(result).split())
 
+def get_parentheses_text(s: str) -> str | None:
+    start = s.find("(")
+    if start == -1:
+        return None
+
+    level = 0
+
+    for i in range(start, len(s)):
+        if s[i] == "(":
+            level += 1
+        elif s[i] == ")":
+            level -= 1
+
+            if level == 0:
+                return s[start:i + 1]
+
+    return None
+
 class Property_loss_order:
     def __init__(self, ws: Worksheet, row:int):
         self.ws: Worksheet = ws
@@ -68,6 +86,7 @@ class Property_loss_order:
         elif isinstance(descr, str):
             descr = descr.strip().lower()
             descr = remove_parentheses(descr)
+            descr = ''.join(char for char in descr if not char.isalpha())
 
             #els = (descr.split(' '))
             return safe_int(descr)
@@ -131,12 +150,17 @@ class Property_loss_order:
 
     @property
     def effects_to_order_num(self):
-        if self.canceled:
+        if not self.isorder or self.canceled:
             return None
+        descr = self.ws.cell(row=self.row,column=3).value
+        if isinstance(descr, int):
+            return None
+        return get_parentheses_text(descr)
+
 
 if __name__=='__main__':
     from waste_keeper.config import tmp_property_loss_orders
     wb: Workbook = load_workbook(tmp_property_loss_orders, data_only=True)
     ws: Worksheet = wb["Sheet1"]
-    plo: Property_loss_order = Property_loss_order(ws, 7660)
-    print(plo.ordernum)
+    plo: Property_loss_order = Property_loss_order(ws, 7119)
+    print(plo.ordernum, plo.effects_to_order_num)
