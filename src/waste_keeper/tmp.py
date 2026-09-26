@@ -1,9 +1,7 @@
-from datetime import datetime
+class classA:
+    pass
 
-from waste_keeper.utils.core import value_to_pydate, value_to_sqlite_date
-s = '30/3/26'
-#print(datetime.strptime(s, '%d/%m/%y').date().isoformat())
-print(value_to_sqlite_date(s))
+A=classA()
 
 
 # def year_servnumb_forrao(row):
