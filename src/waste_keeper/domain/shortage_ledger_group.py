@@ -40,6 +40,17 @@ class Shortage_Ledger_group(ShortageLedgerTitle):
         return num
 
     @property
+    def next_groupnum(self):
+        if not self.isgroup:
+            return None
+        num = self.endnum
+        for i in range(1,15):
+            slt = ShortageLedgerTitle(self.ws, num+i)
+            if slt.isorder:
+                return num+i
+            return None
+
+    @property
     def description(self):
         slt: ShortageLedgerTitle = ShortageLedgerTitle(self.ws, self.startnum)
         descr = slt.cell(16).value
@@ -57,9 +68,9 @@ class Shortage_Ledger_group(ShortageLedgerTitle):
 if __name__ == '__main__':
     from waste_keeper.config import tmp_property_loss_orders, tmp_shortage_ledger
     wb = load_workbook(tmp_shortage_ledger, data_only=True)
-    ws = wb["БПЛА"]
+    ws = wb["ППО"]
 
-    slg = Shortage_Ledger_group(ws, 4315)
-    print(slg.startnum, slg.ordernum, slg.description)
+    slg = Shortage_Ledger_group(ws, 5)
+    print(slg.next_groupnum, slg.description)
 
 
