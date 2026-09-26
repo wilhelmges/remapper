@@ -13,6 +13,7 @@ class OrderMetaExtractor(XlsRow):
 
     @property
     def isorder(self):
+        print(self.row)
         descr = self.ws.cell(row=self.row, column=2).value
         if descr is None:
             return False

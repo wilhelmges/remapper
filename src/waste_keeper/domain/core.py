@@ -183,3 +183,10 @@ def safe_int(value: str) -> int | None:
         digits += char
 
     return int(digits) if digits else None
+
+def remove_duplicate_spaces(text: str) -> str:
+    return " ".join(text.split())
+
+#date oh sheet names 24/09/2026
+sheets = ['ЗББ та Р', 'Зас ураж', 'НСО', 'БПЛА', 'ППО', 'ОВТ та МСП', 'РЕБ', 'Реч', 'Звяз', 'Прод', 'ПММ', 'Мед', 'Авто', 'КЕС', 'Елек', 'Інженерна', 'Пожежна', 'Засоби розвідки', 'Гео', 'Метр', 'РАО', 'РХБЗ', 'Інж']
+

@@ -43,9 +43,6 @@ def print_properties(obj):
             value = f"<Error: {e}>"
         print(f"{name:<{width}} : {value}")
 
-def remove_duplicate_spaces(text: str) -> str:
-    return " ".join(text.split())
-
 def mark_rows_from_dict(filepath, dict, color=Warning_color.GENERAL_CASE):#filepath, dict: Dict
     dict = {
         "БПЛА": [3],
@@ -388,9 +385,6 @@ def grap_operable_property_loss_orders():
 
 #date oh headers 23/09/2026
 headers = ['РАО', 'РАО ЗББ та Р', 'Зас УРАЖ', 'БПЛА', 'ППО', 'НСО', 'РЕБ', 'ОВТ та МСП', 'реч', 'інж', 'зв', 'РХБЗ', 'АС', 'прод', 'мед', 'ПММ', 'гео', 'кес', 'ел-тех', 'пожежна', 'Інженерна', 'засоби розвідки', 'метрол']
-
-#date oh sheet names 24/09/2026
-sheets = ['ЗББ та Р', 'Зас ураж', 'НСО', 'БПЛА', 'ППО', 'ОВТ та МСП', 'РЕБ', 'Реч', 'Звяз', 'Прод', 'ПММ', 'Мед', 'Авто', 'КЕС', 'Елек', 'Інженерна', 'Пожежна', 'Засоби розвідки', 'Гео', 'Метр', 'РАО', 'РХБЗ', 'Інж']
 
 
 department_to_sheet = {
